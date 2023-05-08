@@ -1,5 +1,3 @@
-#include "Spq.h"
-#include "TrafficClass.h"
 #include "ns3/applications-module.h"
 #include "ns3/core-module.h"
 #include "ns3/flow-monitor-helper.h"
@@ -8,7 +6,8 @@
 #include "ns3/network-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/ppp-header.h"
-#include "UdpApplication.h"
+#include "Spq.h"
+
 
 #include <math.h>
 #include <queue>
@@ -17,33 +16,155 @@
 
 using namespace ns3;
 
+//NS_LOG_COMPONENT_DEFINE("DiffServ");
+
+
 NS_LOG_COMPONENT_DEFINE("Spq");
+
+//NS_OBJECT_TEMPLATE_CLASS_DEFINE(DiffServ, Packet);
+
+template <typename Packet>
+TypeId
+DiffServ<Packet>::GetTypeId()
+{
+    static TypeId tid = TypeId("DiffServ")
+                            .SetParent<Queue<Packet>>()
+                            .SetGroupName("DiffServ")
+                            .template AddConstructor<DiffServ<Packet>>();
+    return tid;
+}
+
+template <typename Packet>
+DiffServ<Packet>::DiffServ()
+    // : Queue<Packet>()
+{
+    NS_LOG_FUNCTION(this);
+    in = 0;
+    out = 0;
+}
+
+template <typename Packet>
+DiffServ<Packet>::DiffServ(uint32_t maxPackets,
+                           uint32_t priority_level,
+                           bool isDefault,
+                           Ipv4Address destIpAddr,
+                           Ipv4Mask destMask,
+                           uint32_t destPortNum,
+                           uint32_t protNum,
+                           Ipv4Address sourIpAddr,
+                           Ipv4Mask sourMask,
+                           uint32_t sourPortNum)
+    // : Queue<Packet>()
+{
+    NS_LOG_FUNCTION(this);
+
+    TrafficClass* tc = new TrafficClass(maxPackets,
+                                        priority_level,
+                                        isDefault,
+                                        destIpAddr,
+                                        destMask,
+                                        destPortNum,
+                                        protNum,
+                                        sourIpAddr,
+                                        sourMask,
+                                        sourPortNum);
+    q_class.push_back(tc);
+    in = 0;
+    out = 0;
+}
+
+template <typename Packet>
+DiffServ<Packet>::~DiffServ()
+{
+    NS_LOG_FUNCTION(this);
+}
+
+template <typename Packet>
+bool
+DiffServ<Packet>::DoEnqueue(Ptr<Packet> p)
+{
+    NS_LOG_FUNCTION(this << p);
+    bool res = Classify(p);
+    in++;
+    return res;
+}
+
+template <typename Packet>
+Ptr<Packet>
+DiffServ<Packet>::DoDequeue()
+{
+    NS_LOG_FUNCTION(this);
+    if (in <= out)
+    {
+        return NULL;
+    }
+    Ptr<Packet> res = Schedule()->Dequeue();
+    out++;
+    return res;
+}
+
+template <typename Packet>
+Ptr<Packet>
+DiffServ<Packet>::DoRemove()
+{
+    NS_LOG_FUNCTION(this);
+    if (in <= out)
+    {
+        return NULL;
+    }
+    Ptr<Packet> res = Schedule()->Dequeue();
+    out++;
+    return res;
+}
+
+template <typename Packet>
+Ptr<const Packet>
+DiffServ<Packet>::DoPeek()
+{
+    NS_LOG_FUNCTION(this);
+    return q_class[out % q_class.size()].Peek();
+}
+
+template <typename Packet>
+Ptr<Packet>
+DiffServ<Packet>::Schedule()
+{
+    return q_class[out % q_class.size()].Dequeue();
+}
+
+template <typename Packet>
+uint32_t
+DiffServ<Packet>::Classify(Ptr<Packet> p)
+{
+   return q_class[in % q_class.size()].Enqueue(p);
+}
 
 template <typename Packet>
 SPQ<Packet>::SPQ()
 {
+    NS_LOG_FUNCTION (this);
     // todo: read parameters from config file
     TrafficClass* tc_high = new TrafficClass(100000,
                                          2,
                                          false,
-                                         "10.1.2.0",
-                                         "255.255.255.0",
+                                         "10.1.2.2",
+                                         "255.255.255.3",
                                          9,
                                          17,
-                                         "10.1.1.0",
-                                         "255.255.255.0",
+                                         "10.1.1.1",
+                                         "255.255.255.3",
                                          9999);
     q_class.push_back(tc_high);
 
     TrafficClass* tc_low = new TrafficClass(100000,
                                          1,
                                          true,
-                                         "10.1.2.0",
-                                         "255.255.255.0",
+                                         "10.1.2.2",
+                                         "255.255.255.3",
                                          9,
                                          17,
-                                         "10.1.1.0",
-                                         "255.255.255.0",
+                                         "10.1.1.1",
+                                         "255.255.255.3",
                                          8888);
     q_class.push_back(tc_low);
 }
@@ -56,7 +177,7 @@ SPQ<Packet>::~SPQ()
 
 template <typename Packet>
 TypeId
-SPQ<Packet>::GetTypeId(void)
+SPQ<Packet>::GetTypeId()
 {
     static TypeId tid = TypeId("SPQ<Packet>")
                             .SetParent<Queue<Packet>>()
@@ -114,17 +235,8 @@ bool
 SPQ<Packet>::DoEnqueue(Ptr<Packet> packet)
 {
     uint32_t index_of_qclass = Classify(packet);
-    if (index_of_qclass >= 0)
+    if (index_of_qclass >= 0 && index_of_qclass < 2)        //todo: read 2 from config file
     {
-        Ptr<Packet> copy = packet->Copy();
-        PppHeader pppHeader;
-        Ipv4Header ipHeader;
-        UdpHeader header;
-        copy->RemoveHeader(pppHeader);
-        copy->RemoveHeader(ipHeader);
-        copy->RemoveHeader(header);
-        copy->PeekHeader(header);
-
         if (q_class[index_of_qclass]->GePackets() < q_class[index_of_qclass]->GetMaxPackets())
         {
             q_class[index_of_qclass]->getMqueue()->push(packet);
@@ -140,6 +252,7 @@ SPQ<Packet>::DoEnqueue(Ptr<Packet> packet)
                 if (tc->GePackets() < tc->GetMaxPackets())
                 {
                     tc->getMqueue()->push(packet);
+                    return true;
                 }
             }
         }
@@ -210,130 +323,6 @@ SPQ<Packet>::Schedule()
     }
     return nullptr;
 }
-
-// class UdpApplication : public ns3::Application
-// {
-//   public:
-//     UdpApplication();
-//     virtual ~UdpApplication();
-//     static TypeId GetTypeId();
-//     void Setup(Ptr<Socket> socket,
-//                Address address,
-//                uint32_t packetSize,
-//                uint32_t nPackets,
-//                DataRate dataRate,
-//                uint32_t portNumber);
-
-//   private:
-//     void StartApplication() override;
-//     void StopApplication() override;
-//     void ScheduleTx();
-//     void SendPacket();
-//     Ptr<Socket> m_socket;   //!< The transmission socket.
-//     Address m_peer;         //!< The destination address.
-//     uint32_t m_packetSize;  //!< The packet size.
-//     uint32_t m_nPackets;    //!< The number of packets to send.
-//     DataRate m_dataRate;    //!< The data rate to use.
-//     EventId m_sendEvent;    //!< Send event.
-//     bool m_running;         //!< True if the application is running.
-//     uint32_t m_packetsSent; //!< The number of packets sent.
-//     uint16_t m_portNumber;
-// };
-
-// UdpApplication::UdpApplication()
-//     : m_socket(nullptr),
-//       m_peer(),
-//       m_packetSize(0),
-//       m_nPackets(0),
-//       m_dataRate(0),
-//       m_sendEvent(),
-//       m_running(false),
-//       m_packetsSent(0),
-//       m_portNumber(0)
-// {
-// }
-
-// UdpApplication::~UdpApplication()
-// {
-//     m_socket = nullptr;
-// }
-
-// TypeId
-// UdpApplication::GetTypeId()
-// {
-//     static TypeId tid = TypeId("UdpApplication")
-//                             .SetParent<Application>()
-//                             .SetGroupName("Udp")
-//                             .AddConstructor<UdpApplication>();
-//     return tid;
-// }
-
-// void
-// UdpApplication::Setup(Ptr<Socket> socket,
-//                       Address address,
-//                       uint32_t packetSize,
-//                       uint32_t nPackets,
-//                       DataRate dataRate,
-//                       uint32_t portNumber)
-// {
-//     m_socket = socket;
-//     m_peer = address;
-//     m_packetSize = packetSize;
-//     m_nPackets = nPackets;
-//     m_dataRate = dataRate;
-//     m_portNumber = portNumber;
-// }
-
-// void
-// UdpApplication::StartApplication()
-// {
-//     m_running = true;
-//     m_packetsSent = 0;
-//     m_socket->Bind();
-//     m_socket->Connect(m_peer);
-//     SendPacket();
-// }
-
-// void
-// UdpApplication::StopApplication()
-// {
-//     m_running = false;
-
-//     if (m_sendEvent.IsRunning())
-//     {
-//         Simulator::Cancel(m_sendEvent);
-//     }
-
-//     if (m_socket)
-//     {
-//         m_socket->Close();
-//     }
-// }
-
-// void
-// UdpApplication::SendPacket()
-// {
-//     Ptr<Packet> packet = Create<Packet>(m_packetSize);
-//     UdpHeader header;
-//     header.SetSourcePort(m_portNumber);
-//     packet->AddHeader(header);
-//     m_socket->Send(packet);
-
-//     if (++m_packetsSent < m_nPackets)
-//     {
-//         ScheduleTx();
-//     }
-// }
-
-// void
-// UdpApplication::ScheduleTx()
-// {
-//     if (m_running)
-//     {
-//         Time tNext(Seconds(m_packetSize * 8 / static_cast<double>(m_dataRate.GetBitRate())));
-//         m_sendEvent = Simulator::Schedule(tNext, &UdpApplication::SendPacket, this);
-//     }
-// }
 
 int
 main(int argc, char* argv[])

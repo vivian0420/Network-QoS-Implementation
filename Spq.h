@@ -1,16 +1,14 @@
-#ifndef SPQ_H
-#define SPQ_H
-
 #include "TrafficClass.h"
-#include "DiffServ.h"
+#include "diffserv.h"
+#include "UdpApplication.h"
 using namespace ns3;
 
 template <typename Packet>
 class SPQ : public DiffServ<Packet>
 {
     public:
-        SPQ();
-        ~SPQ();
+        SPQ<Packet>();
+        ~SPQ<Packet>();
 
         static TypeId GetTypeId(void);
     
@@ -28,6 +26,3 @@ class SPQ : public DiffServ<Packet>
         Ptr<const Packet> DoPeek() const;
         Ptr<Packet> DoRemove();
 };
-
-
-#endif // SPQ_H
