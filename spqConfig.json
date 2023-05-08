@@ -1,0 +1,13 @@
+
+{
+    "numOfQueue": 2,
+    "rplOfQueue1": 1,
+    "rplOfQueue2": 2,
+    "sourceIpAddress": "10.0.0.1",
+    "sourceMask": "255.255.255.0",
+    "sourcePortNumber": 8888,
+    "destinatoinIpAddress": "10.0.0.2",
+    "destinationMask": "255.255.255.0",
+    "destinationPortNumber": 9999,
+    "protocolNumber": 17
+}
