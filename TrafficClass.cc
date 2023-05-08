@@ -1,6 +1,9 @@
 #include "TrafficClass.h"
+
 #include "Filter.h"
 #include "destination_ip_address.h"
+#include "diffserv.h"
+
 #include "ns3/log.h"
 #include "ns3/packet.h"
 
@@ -39,13 +42,57 @@ TrafficClass::TrafficClass(uint32_t maxPackets,
     SourceIpAddress* sour_ip_addr = new SourceIpAddress(sourIpAddr);
     SourceMask* sour_mask = new SourceMask(sourMask);
     SourcePortNumber* sour_port_number = new SourcePortNumber(sourPortNum);
-    Filter* filter =
-        new Filter(dest_ip_addr, dest_mask, dest_port_number, porto_number, sour_ip_addr, sour_mask, sour_port_number);
+    Filter* filter = new Filter(dest_ip_addr,
+                                dest_mask,
+                                dest_port_number,
+                                porto_number,
+                                sour_ip_addr,
+                                sour_mask,
+                                sour_port_number);
     std::vector<Filter*> filters;
     filters.push_back(filter);
     this->filters = filters;
 
     NS_LOG_FUNCTION(this);
+}
+
+TrafficClass::TrafficClass(uint32_t maxPackets,
+             uint32_t* quantum_size,
+             uint32_t* deficit_counter,
+             bool isDefault,
+             Ipv4Address destIpAddr,
+             Ipv4Mask destMask,
+             uint32_t destPortNum,
+             uint32_t protNum,
+             Ipv4Address sourIpAddr,
+             Ipv4Mask sourMask,
+             uint32_t sourPortNum)
+{
+    this->maxPackets = maxPackets;
+    this->quantum_size = quantum_size;
+    this->deficit_counter = deficit_counter;
+    this->isDefault = isDefault;
+
+    DestinationIpAddress* dest_ip_addr = new DestinationIpAddress(destIpAddr);
+    DestinationMask* dest_mask = new DestinationMask(destMask);
+    DestinationPortNumber* dest_port_number = new DestinationPortNumber(destPortNum);
+    ProtocolNumber* porto_number = new ProtocolNumber(protNum);
+    SourceIpAddress* sour_ip_addr = new SourceIpAddress(sourIpAddr);
+    SourceMask* sour_mask = new SourceMask(sourMask);
+    SourcePortNumber* sour_port_number = new SourcePortNumber(sourPortNum);
+    Filter* filter = new Filter(dest_ip_addr,
+                                dest_mask,
+                                dest_port_number,
+                                porto_number,
+                                sour_ip_addr,
+                                sour_mask,
+                                sour_port_number);
+    std::vector<Filter*> filters;
+    filters.push_back(filter);
+    this->filters = filters;
+
+    NS_LOG_FUNCTION(this);
+
 }
 
 TrafficClass::~TrafficClass()
@@ -101,8 +148,32 @@ TrafficClass::GetDefault()
     return isDefault;
 }
 
-std::queue<Ptr<Packet>>* 
-TrafficClass:: getMqueue()
+void
+TrafficClass::setQuantumSize(uint32_t q)
+{
+    *quantum_size = q;
+}
+
+uint32_t
+TrafficClass::getQuantumSize()
+{
+    return *quantum_size;
+}
+
+void
+TrafficClass::setDeficitCounter(uint32_t d)
+{
+    *deficit_counter = d;
+}
+
+uint32_t
+TrafficClass::getDeficitCounter()
+{
+    return *deficit_counter;
+}
+
+std::queue<Ptr<Packet>>*
+TrafficClass::getMqueue()
 {
     return &m_queue;
 }
