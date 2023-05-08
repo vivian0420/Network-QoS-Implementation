@@ -17,7 +17,7 @@ class TrafficClass
     uint32_t packets;
     uint32_t maxPackets;
     uint32_t priority_level;
-    uint32_t* quantum_size;
+    uint32_t quantum_size;
     uint32_t* deficit_counter;
     bool isDefault;
     std::queue<Ptr<Packet>> m_queue;
@@ -37,8 +37,8 @@ class TrafficClass
                  Ipv4Mask sourMask,
                  uint32_t sourPortNum);
     TrafficClass(uint32_t maxPackets,
-                 uint32_t* quantum_size,
-                 uint32_t* deficit_counter,
+                 uint32_t quantum_size,
+                 uint32_t deficit_counter,
                  bool isDefault,
                  Ipv4Address destIpAddr,
                  Ipv4Mask destMask,
@@ -50,7 +50,7 @@ class TrafficClass
     ~TrafficClass();
 
     void SetPackets(uint32_t p);
-    uint32_t GePackets();
+    uint32_t GetPackets();
     void SetMaxPackets(uint32_t mp);
     uint32_t GetMaxPackets();
     void SetPriorityLevel(double_t p);

@@ -34,7 +34,6 @@ TrafficClass::TrafficClass(uint32_t maxPackets,
     this->maxPackets = maxPackets;
     this->priority_level = priority_level;
     this->isDefault = isDefault;
-    // this->filters = filters;
     DestinationIpAddress* dest_ip_addr = new DestinationIpAddress(destIpAddr);
     DestinationMask* dest_mask = new DestinationMask(destMask);
     DestinationPortNumber* dest_port_number = new DestinationPortNumber(destPortNum);
@@ -57,8 +56,8 @@ TrafficClass::TrafficClass(uint32_t maxPackets,
 }
 
 TrafficClass::TrafficClass(uint32_t maxPackets,
-             uint32_t* quantum_size,
-             uint32_t* deficit_counter,
+             uint32_t quantum_size,
+             uint32_t deficit_counter,
              bool isDefault,
              Ipv4Address destIpAddr,
              Ipv4Mask destMask,
@@ -70,7 +69,8 @@ TrafficClass::TrafficClass(uint32_t maxPackets,
 {
     this->maxPackets = maxPackets;
     this->quantum_size = quantum_size;
-    this->deficit_counter = deficit_counter;
+    this->deficit_counter = new uint32_t;
+    *this->deficit_counter = deficit_counter;
     this->isDefault = isDefault;
 
     DestinationIpAddress* dest_ip_addr = new DestinationIpAddress(destIpAddr);
@@ -107,7 +107,7 @@ TrafficClass::SetPackets(uint32_t p) // todo
 }
 
 uint32_t
-TrafficClass::GePackets() // todo
+TrafficClass::GetPackets() // todo
 {
     return m_queue.size();
 }
@@ -151,13 +151,13 @@ TrafficClass::GetDefault()
 void
 TrafficClass::setQuantumSize(uint32_t q)
 {
-    *quantum_size = q;
+    quantum_size = q;
 }
 
 uint32_t
 TrafficClass::getQuantumSize()
 {
-    return *quantum_size;
+    return quantum_size;
 }
 
 void
