@@ -13,6 +13,8 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 using namespace ns3;
 
@@ -143,7 +145,6 @@ template <typename Packet>
 SPQ<Packet>::SPQ()
 {
     NS_LOG_FUNCTION (this);
-    // todo: read parameters from config file
     TrafficClass* tc_high = new TrafficClass(100000,
                                          2,
                                          false,
@@ -167,6 +168,29 @@ SPQ<Packet>::SPQ()
                                          "255.255.255.3",
                                          8888);
     q_class.push_back(tc_low);
+    q_num = 2;
+}
+
+template <typename Packet>
+SPQ<Packet>::SPQ(std::vector<MyConfig> configs)
+{
+    NS_LOG_FUNCTION (this);
+    for (uint32_t i = 0; i < configs.size(); i++)
+    {
+        MyConfig config = configs[i];
+        TrafficClass* tc = new TrafficClass(config.maxPackets,
+                                         config.priority_level,
+                                         config.isDefault,
+                                         config.destIpAddr,
+                                         config.destMask,
+                                         config.destPortNum,
+                                         config.protNum,
+                                         config.sourIpAddr,
+                                         config.sourMask,
+                                         config.sourPortNum);
+        q_class.push_back(tc);
+        q_num++;
+    }
 }
 
 template <typename Packet>
@@ -235,7 +259,7 @@ bool
 SPQ<Packet>::DoEnqueue(Ptr<Packet> packet)
 {
     uint32_t index_of_qclass = Classify(packet);
-    if (index_of_qclass >= 0 && index_of_qclass < 2)        //todo: read 2 from config file
+    if (index_of_qclass >= 0 && index_of_qclass < q_num)
     {
         if (q_class[index_of_qclass]->GetPackets() < q_class[index_of_qclass]->GetMaxPackets())
         {
@@ -290,7 +314,7 @@ template <typename Packet>
 Ptr<const Packet>
 SPQ<Packet>::DoPeek() const
 {
-    for(int i = 0; i < 2; i++) {          //todo: read '2' from config file
+    for(int i = 0; i < q_num; i++) {
         if(!q_class[i]->IsEmpty()) {
             return q_class[i]->getMqueue()->front();
         }
@@ -302,8 +326,8 @@ template <typename Packet>
 uint32_t
 SPQ<Packet>::Classify(Ptr<Packet> p)
 {
-    for (int i = 0; i < 2; i++)
-    { // todo: read '2' from config
+    for (int i = 0; i < q_num; i++)
+    {
         if (q_class[i]->match(p))
         {
             return i;
@@ -316,7 +340,7 @@ template <typename Packet>
 std::queue<Ptr<Packet>>*
 SPQ<Packet>::Schedule()
 {
-    for(int i = 0; i < 2; i++) {          //todo: read '2' from config file
+    for(int i = 0; i < q_num; i++) {
         if(!q_class[i]->IsEmpty()) {
             return q_class[i]->getMqueue();
         }
@@ -327,8 +351,64 @@ SPQ<Packet>::Schedule()
 int
 main(int argc, char* argv[])
 {
+    // config file path
+    std::string fileName = "";
+
     CommandLine cmd(__FILE__);
+    cmd.AddValue("spq", "file name", fileName);
     cmd.Parse(argc, argv);
+
+    // read config
+    std::vector<MyConfig> myConfigs;
+
+    std::ifstream configFile(fileName);
+    if (!configFile.is_open()) {
+        std::cerr << "Failed to open config file: " << fileName << std::endl;
+        return 1;
+    }
+
+    std::string line;
+
+    MyConfig currentConfig = {};
+    bool isNewConfig = true;
+
+    while (getline(configFile, line)) {
+        // Skip empty lines and comments
+        if (line.empty() || line[0] == '#') {
+            std::cout << "\n" << std::endl;
+            continue;
+        }
+
+        if (isNewConfig) {
+            if (startsWith(line, "\"queueId\"")) {
+                isNewConfig = false;
+                currentConfig = {};
+            }
+        } else {
+            setConfigValue(line, currentConfig);
+            if (startsWith(line, "\"destIP\"")) {
+                myConfigs.push_back(currentConfig);
+                isNewConfig = true;
+            }
+        }
+    }
+
+    for (int i = 0; i < 2; i++) {
+        MyConfig c = myConfigs[i];
+        std::cout << "maxPackets = " << c.maxPackets << std::endl;
+        std::cout << "priorityLevel = " << c.priority_level << std::endl;
+        std::cout << "isDefault = " << c.isDefault << std::endl;
+        std::cout << "sourceIpAddress = " << c.sourIpAddr << std::endl;
+        std::cout << "sourceMask = " << c.sourMask << std::endl;
+        std::cout << "sourcePortNumber = " << c.sourPortNum << std::endl;
+        std::cout << "destIpAddress = " << c.destIpAddr << std::endl;
+        std::cout << "destMask = " << c.destMask << std::endl;
+        std::cout << "destPortNumber = " << c.destPortNum << std::endl;
+        std::cout << "protocolNumber = " << c.protNum << std::endl;
+        std::cout << "sourceIP = " << c.sourceIp << std::endl;
+        std::cout << "destIP = " << c.destIp << std::endl;
+        std::cout << "\n"  << std::endl;
+    }
 
     // LogComponentEnable("UdpApplication", LOG_LEVEL_INFO);
     // LogComponentEnable("UdpServerApplication", LOG_LEVEL_INFO);
@@ -347,14 +427,14 @@ main(int argc, char* argv[])
     devA->SetAttribute("DataRate", StringValue("10Mbps"));
     devA->SetAddress(Mac48Address::Allocate());
     n0r.Get(0)->AddDevice(devA);
-    Ptr<SPQ<Packet>> queueA = CreateObject<SPQ<Packet>>();
+    Ptr<SPQ<Packet>> queueA = CreateObject<SPQ<Packet>>(myConfigs);
     devA->SetQueue(queueA);
 
     Ptr<PointToPointNetDevice> devB = CreateObject<PointToPointNetDevice>();
     devB->SetAttribute("DataRate", StringValue("10Mbps"));
     devB->SetAddress(Mac48Address::Allocate());
     n0r.Get(1)->AddDevice(devB);
-    Ptr<SPQ<Packet>> queueB = CreateObject<SPQ<Packet>>();
+    Ptr<SPQ<Packet>> queueB = CreateObject<SPQ<Packet>>(myConfigs);
     devB->SetQueue(queueB);
 
     Ptr<PointToPointChannel> channel1 = CreateObject<PointToPointChannel>();
@@ -368,14 +448,14 @@ main(int argc, char* argv[])
     devC->SetAttribute("DataRate", StringValue("10Mbps"));
     devC->SetAddress(Mac48Address::Allocate());
     n1r.Get(0)->AddDevice(devC);
-    Ptr<SPQ<Packet>> queueC = CreateObject<SPQ<Packet>>();
+    Ptr<SPQ<Packet>> queueC = CreateObject<SPQ<Packet>>(myConfigs);
     devC->SetQueue(queueC);
 
     Ptr<PointToPointNetDevice> devD = CreateObject<PointToPointNetDevice>();
     devD->SetAttribute("DataRate", StringValue("10Mbps"));
     devD->SetAddress(Mac48Address::Allocate());
     n1r.Get(1)->AddDevice(devD);
-    Ptr<SPQ<Packet>> queueD = CreateObject<SPQ<Packet>>();
+    Ptr<SPQ<Packet>> queueD = CreateObject<SPQ<Packet>>(myConfigs);
     devD->SetQueue(queueD);
 
     Ptr<PointToPointChannel> channel2 = CreateObject<PointToPointChannel>();

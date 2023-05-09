@@ -1,6 +1,9 @@
 #include "TrafficClass.h"
-#include "diffserv.h"
+#include "DiffServ.h"
 #include "UdpApplication.h"
+#include "util.h"
+#include <vector>
+
 using namespace ns3;
 
 template <typename Packet>
@@ -8,6 +11,7 @@ class SPQ : public DiffServ<Packet>
 {
     public:
         SPQ<Packet>();
+        SPQ(std::vector<MyConfig> configs);
         ~SPQ<Packet>();
 
         static TypeId GetTypeId(void);
@@ -25,4 +29,7 @@ class SPQ : public DiffServ<Packet>
         Ptr<Packet> DoDequeue();
         Ptr<const Packet> DoPeek() const;
         Ptr<Packet> DoRemove();
+    
+    private:
+        uint32_t q_num;
 };
