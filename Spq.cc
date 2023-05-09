@@ -237,7 +237,7 @@ SPQ<Packet>::DoEnqueue(Ptr<Packet> packet)
     uint32_t index_of_qclass = Classify(packet);
     if (index_of_qclass >= 0 && index_of_qclass < 2)        //todo: read 2 from config file
     {
-        if (q_class[index_of_qclass]->GePackets() < q_class[index_of_qclass]->GetMaxPackets())
+        if (q_class[index_of_qclass]->GetPackets() < q_class[index_of_qclass]->GetMaxPackets())
         {
             q_class[index_of_qclass]->getMqueue()->push(packet);
             return true;
@@ -249,7 +249,7 @@ SPQ<Packet>::DoEnqueue(Ptr<Packet> packet)
         {
             if (tc->GetDefault() == true)
             {
-                if (tc->GePackets() < tc->GetMaxPackets())
+                if (tc->GetPackets() < tc->GetMaxPackets())
                 {
                     tc->getMqueue()->push(packet);
                     return true;
@@ -264,10 +264,10 @@ template <typename Packet>
 Ptr<Packet>
 SPQ<Packet>::DoDequeue()
 {
-    TrafficClass* tc = Schedule();
-    if(tc != nullptr) {
-        Ptr<Packet> packet = tc->getMqueue()->front();
-        tc->getMqueue()->pop();
+    std::queue<Ptr<Packet>>* mqueue = Schedule();
+    if(mqueue != nullptr && !mqueue->empty()) {
+        Ptr<Packet> packet = mqueue->front();
+        mqueue->pop();
         return packet;
     } 
     return nullptr;
@@ -277,10 +277,10 @@ template <typename Packet>
 Ptr<Packet>
 SPQ<Packet>::DoRemove()
 {
-    TrafficClass* tc = Schedule();
-    if(tc != nullptr) {
-        Ptr<Packet> packet = tc->getMqueue()->front();
-        tc->getMqueue()->pop();
+    std::queue<Ptr<Packet>>* mqueue = Schedule();
+    if(mqueue->size() != 0) {
+        Ptr<Packet> packet = mqueue->front();
+        mqueue->pop();
         return packet;
     } 
     return nullptr;
@@ -313,12 +313,12 @@ SPQ<Packet>::Classify(Ptr<Packet> p)
 }
 
 template <typename Packet>
-TrafficClass*
+std::queue<Ptr<Packet>>*
 SPQ<Packet>::Schedule()
 {
     for(int i = 0; i < 2; i++) {          //todo: read '2' from config file
         if(!q_class[i]->IsEmpty()) {
-            return q_class[i];
+            return q_class[i]->getMqueue();
         }
     }
     return nullptr;
@@ -333,7 +333,6 @@ main(int argc, char* argv[])
     // LogComponentEnable("UdpApplication", LOG_LEVEL_INFO);
     // LogComponentEnable("UdpServerApplication", LOG_LEVEL_INFO);
 
-    // NS_LOG_INFO("Create nodes.");
     NodeContainer nodes;
     nodes.Create(3);
 

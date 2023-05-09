@@ -17,7 +17,7 @@ class SPQ : public DiffServ<Packet>
         Ptr<Packet> Remove() override;
         Ptr<const Packet> Peek(void) const override;
         uint32_t Classify(Ptr<Packet> p);
-        TrafficClass* Schedule();
+        std::queue<Ptr<Packet>>* Schedule();
 
     protected:
         std::vector<TrafficClass*> q_class;
