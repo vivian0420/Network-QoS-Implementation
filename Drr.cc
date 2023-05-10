@@ -176,6 +176,31 @@ DRR<Packet>::DRR()
                                          "255.255.255.3",
                                          9999);
     q_class.push_back(tc3);
+    q_num = 3;
+}
+
+template <typename Packet>
+DRR<Packet>::DRR(std::vector<MyConfig> configs)
+{
+    NS_LOG_FUNCTION (this);
+    // todo: read parameters from config file
+    for (uint32_t i = 0; i < configs.size(); i++)
+    {
+        MyConfig config = configs[i];
+        TrafficClass* tc = new TrafficClass(config.maxPackets,
+                                         config.quantum_size,
+                                         0,
+                                         config.isDefault,
+                                         config.destIpAddr,
+                                         config.destMask,
+                                         config.destPortNum,
+                                         config.protNum,
+                                         config.sourIpAddr,
+                                         config.sourMask,
+                                         config.sourPortNum);
+        q_class.push_back(tc);
+        q_num++;
+    }
 }
 
 template <typename Packet>
@@ -252,7 +277,7 @@ bool
 DRR<Packet>::DoEnqueue(Ptr<Packet> packet)
 {
     uint32_t index_of_qclass = Classify(packet);
-    if (index_of_qclass >= 0 && index_of_qclass < 3)        //todo: read 3 from config file
+    if (index_of_qclass >= 0 && index_of_qclass < q_num)        //todo: read 3 from config file
     {
         if (q_class[index_of_qclass]->GetPackets() < q_class[index_of_qclass]->GetMaxPackets())
         {
@@ -311,7 +336,7 @@ DRR<Packet>::DoPeek() const
 {
     if (getTempqueue()->empty())
     {
-        for (int i = 0; i < 3; i++)                // todo: read '3' from config file
+        for (int i = 0; i < q_num; i++)                // todo: read '3' from config file
         {                                           
             if (q_class[i]->getPackets() != 0)
             {
@@ -335,7 +360,7 @@ template <typename Packet>
 uint32_t
 DRR<Packet>::Classify(Ptr<Packet> p)
 {
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < q_num; i++)
     {                                         // todo: read '2' from config
         if (q_class[i]->match(p))
         {
@@ -351,7 +376,7 @@ DRR<Packet>::Schedule()
 {
     if (getTempqueue()->empty())
     {
-        for (int i = 0; i < 3; i++)                // todo: read '3' from config file
+        for (int i = 0; i < q_num; i++)                // todo: read '3' from config file
         {                                           
             if (q_class[i]->GetPackets() != 0)
             {
@@ -374,8 +399,64 @@ DRR<Packet>::Schedule()
 int
 main(int argc, char* argv[])
 {
+    std::string fileName = "";
+
     CommandLine cmd(__FILE__);
+    cmd.AddValue("drr", "file name", fileName);
     cmd.Parse(argc, argv);
+
+    // read config
+    std::vector<MyConfig> myConfigs;
+
+    std::ifstream configFile(fileName);
+    if (!configFile.is_open()) {
+        std::cerr << "Failed to open config file: " << fileName << std::endl;
+        return 1;
+    }
+
+    std::string line;
+
+    MyConfig currentConfig = {};
+    bool isNewConfig = true;
+
+    while (getline(configFile, line)) {
+        // Skip empty lines and comments
+        if (line.empty() || line[0] == '#') {
+            std::cout << "\n" << std::endl;
+            continue;
+        }
+
+        if (isNewConfig) {
+            if (startsWith(line, "\"queueId\"")) {
+                isNewConfig = false;
+                currentConfig = {};
+            }
+        } else {
+            setConfigValue(line, currentConfig);
+            if (startsWith(line, "\"destIP\"")) {
+                myConfigs.push_back(currentConfig);
+                isNewConfig = true;
+            }
+        }
+    }
+
+        for (int i = 0; i < 3; i++) {
+        MyConfig c = myConfigs[i];
+        std::cout << "maxPackets = " << c.maxPackets << std::endl;
+        std::cout << "quantumn_size = " << c.quantum_size << std::endl;
+        std::cout << "isDefault = " << c.isDefault << std::endl;
+        std::cout << "sourceIpAddress = " << c.sourIpAddr << std::endl;
+        std::cout << "sourceMask = " << c.sourMask << std::endl;
+        std::cout << "sourcePortNumber = " << c.sourPortNum << std::endl;
+        std::cout << "destIpAddress = " << c.destIpAddr << std::endl;
+        std::cout << "destMask = " << c.destMask << std::endl;
+        std::cout << "destPortNumber = " << c.destPortNum << std::endl;
+        std::cout << "protocolNumber = " << c.protNum << std::endl;
+        std::cout << "sourceIP = " << c.sourceIp << std::endl;
+        std::cout << "destIP = " << c.destIp << std::endl;
+        std::cout << "\n"  << std::endl;
+    }
+
 
     // LogComponentEnable("UdpApplication", LOG_LEVEL_INFO);
     // LogComponentEnable("UdpServerApplication", LOG_LEVEL_INFO);
@@ -395,14 +476,14 @@ main(int argc, char* argv[])
     devA->SetAttribute("DataRate", StringValue("10Mbps"));
     devA->SetAddress(Mac48Address::Allocate());
     n0r.Get(0)->AddDevice(devA);
-    Ptr<DRR<Packet>> queueA = CreateObject<DRR<Packet>>();
+    Ptr<DRR<Packet>> queueA = CreateObject<DRR<Packet>>(myConfigs);
     devA->SetQueue(queueA);
 
     Ptr<PointToPointNetDevice> devB = CreateObject<PointToPointNetDevice>();
     devB->SetAttribute("DataRate", StringValue("10Mbps"));
     devB->SetAddress(Mac48Address::Allocate());
     n0r.Get(1)->AddDevice(devB);
-    Ptr<DRR<Packet>> queueB = CreateObject<DRR<Packet>>();
+    Ptr<DRR<Packet>> queueB = CreateObject<DRR<Packet>>(myConfigs);
     devB->SetQueue(queueB);
 
     Ptr<PointToPointChannel> channel1 = CreateObject<PointToPointChannel>();
@@ -416,14 +497,14 @@ main(int argc, char* argv[])
     devC->SetAttribute("DataRate", StringValue("10Mbps"));
     devC->SetAddress(Mac48Address::Allocate());
     n1r.Get(0)->AddDevice(devC);
-    Ptr<DRR<Packet>> queueC = CreateObject<DRR<Packet>>();
+    Ptr<DRR<Packet>> queueC = CreateObject<DRR<Packet>>(myConfigs);
     devC->SetQueue(queueC);
 
     Ptr<PointToPointNetDevice> devD = CreateObject<PointToPointNetDevice>();
     devD->SetAttribute("DataRate", StringValue("10Mbps"));
     devD->SetAddress(Mac48Address::Allocate());
     n1r.Get(1)->AddDevice(devD);
-    Ptr<DRR<Packet>> queueD = CreateObject<DRR<Packet>>();
+    Ptr<DRR<Packet>> queueD = CreateObject<DRR<Packet>>(myConfigs);
     devD->SetQueue(queueD);
 
     Ptr<PointToPointChannel> channel2 = CreateObject<PointToPointChannel>();

@@ -6,6 +6,7 @@ using namespace ns3;
 struct MyConfig {
     uint32_t maxPackets;
     uint32_t priority_level;
+    uint32_t quantum_size;
     bool isDefault;
     Ipv4Address destIpAddr;
     Ipv4Mask destMask;
@@ -33,6 +34,9 @@ setConfigValue(std::string& line, MyConfig& config)
     } else if (startsWith(line, "\"priorityLevel\"")) {
         std::string priorityLevelStr = line.substr(line.find(":") + 1);
         config.priority_level = atoi(priorityLevelStr .c_str());
+    } else if (startsWith(line, "\"quantumSize\"")) {
+        std::string qutumSizeStr = line.substr(line.find(":") + 1);
+        config.quantum_size = atoi(qutumSizeStr .c_str());
     } else if (startsWith(line, "\"isDefault\"")) {
         std::string isDefaultStr = line.substr(line.find(":") + 1);
         config.isDefault = atoi(isDefaultStr .c_str());
@@ -65,6 +69,7 @@ setConfigValue(std::string& line, MyConfig& config)
         config.sourceIp.Set(sourceIPStr.c_str());
     } else if (startsWith(line, "\"destIP\"")) {
         std::string destIPStr = line.substr(line.find(":") + 2);
-        config.destIp.Set(destIPStr.c_str());
+        Ipv4Address addr(destIPStr.c_str());
+        config.destIp = addr;
     }
 }

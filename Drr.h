@@ -1,6 +1,8 @@
 #include "TrafficClass.h"
-#include "diffserv.h"
+#include "DiffServ.h"
 #include "UdpApplication.h"
+#include "util.h"
+
 using namespace ns3;
 
 template <typename Packet>
@@ -8,6 +10,7 @@ class DRR : public DiffServ<Packet>
 {
   private:
     std::queue<Ptr<Packet>> temp_queue;
+    uint32_t q_num;
   
   protected:
     std::vector<TrafficClass*> q_class;
@@ -18,6 +21,7 @@ class DRR : public DiffServ<Packet>
 
   public:
     DRR();
+    DRR(std::vector<MyConfig> configs);
     ~DRR();
     static TypeId GetTypeId();
     Ptr<Packet> Dequeue() override;

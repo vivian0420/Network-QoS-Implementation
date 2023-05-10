@@ -1,11 +1,11 @@
 
 "queueId": 1
 "maxPackets": 100000
-"priorityLevel": 2
+"quantumSize": 1200
 "isDefault": 0
 "sourceIpAddress": 10.1.1.1
 "sourceMask": 255.255.255.3
-"sourcePortNumber": 9999
+"sourcePortNumber": 6666
 "destinatoinIpAddress": 10.1.2.2
 "destinationMask": 255.255.255.3
 "destinationPortNumber": 9
@@ -15,11 +15,25 @@
 
 "queueId": 2
 "maxPackets": 100000
-"priorityLevel": 1
-"isDefault": 1
+"quantumSize": 800
+"isDefault": 0
 "sourceIpAddress": 10.1.1.1
 "sourceMask": 255.255.255.3
 "sourcePortNumber": 8888
+"destinatoinIpAddress": 10.1.2.2
+"destinationMask": 255.255.255.3
+"destinationPortNumber": 9
+"protocolNumber": 17
+"sourceIP": 10.1.1.0
+"destIP": 10.1.2.0
+
+"queueId": 3
+"maxPackets": 100000
+"quantumSize": 400
+"isDefault": 0
+"sourceIpAddress": 10.1.1.1
+"sourceMask": 255.255.255.3
+"sourcePortNumber": 9999
 "destinatoinIpAddress": 10.1.2.2
 "destinationMask": 255.255.255.3
 "destinationPortNumber": 9
