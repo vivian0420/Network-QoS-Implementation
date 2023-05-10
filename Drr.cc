@@ -141,59 +141,12 @@ template <typename Packet>
 DRR<Packet>::DRR()
 {
     NS_LOG_FUNCTION (this);
-    // todo: read parameters from config file
-    TrafficClass* tc1 = new TrafficClass(100000,
-                                         1200,
-                                         0,
-                                         false,
-                                         "10.1.2.2",
-                                         "255.255.255.0",
-                                         9,
-                                         17,
-                                         "10.1.1.1",
-                                         "255.255.255.0",
-                                         6666,
-                                         "10.1.1.0",
-                                         "10.1.2.0");
-    q_class.push_back(tc1);
-
-    TrafficClass* tc2 = new TrafficClass(100000,
-                                         800,
-                                         0,
-                                         false,
-                                         "10.1.2.2",
-                                         "255.255.255.0",
-                                         9,
-                                         17,
-                                         "10.1.1.1",
-                                         "255.255.255.0",
-                                         8888,
-                                         "10.1.1.0",
-                                         "10.1.2.0");
-    q_class.push_back(tc2);
-
-    TrafficClass* tc3 = new TrafficClass(100000,
-                                         400,
-                                         0,
-                                         true,
-                                         "10.1.2.2",
-                                         "255.255.255.0",
-                                         9,
-                                         17,
-                                         "10.1.1.1",
-                                         "255.255.255.0",
-                                         9999,
-                                         "10.1.1.0",
-                                         "10.1.2.0");
-    q_class.push_back(tc3);
-    q_num = 3;
 }
 
 template <typename Packet>
 DRR<Packet>::DRR(std::vector<MyConfig> configs)
 {
     NS_LOG_FUNCTION (this);
-    // todo: read parameters from config file
     for (uint32_t i = 0; i < configs.size(); i++)
     {
         MyConfig config = configs[i];
@@ -289,7 +242,7 @@ bool
 DRR<Packet>::DoEnqueue(Ptr<Packet> packet)
 {
     uint32_t index_of_qclass = Classify(packet);
-    if (index_of_qclass >= 0 && index_of_qclass < q_num)        //todo: read 3 from config file
+    if (index_of_qclass >= 0 && index_of_qclass < q_num)
     {
         if (q_class[index_of_qclass]->GetPackets() < q_class[index_of_qclass]->GetMaxPackets())
         {
@@ -348,7 +301,7 @@ DRR<Packet>::DoPeek() const
 {
     if (getTempqueue()->empty())
     {
-        for (int i = 0; i < q_num; i++)                // todo: read '3' from config file
+        for (int i = 0; i < q_num; i++)
         {                                           
             if (q_class[i]->getPackets() != 0)
             {
@@ -373,7 +326,7 @@ uint32_t
 DRR<Packet>::Classify(Ptr<Packet> p)
 {
     for (int i = 0; i < q_num; i++)
-    {                                         // todo: read '2' from config
+    {
         if (q_class[i]->match(p))
         {
             return i;
@@ -388,7 +341,7 @@ DRR<Packet>::Schedule()
 {
     if (getTempqueue()->empty())
     {
-        for (int i = 0; i < q_num; i++)                // todo: read '3' from config file
+        for (int i = 0; i < q_num; i++)
         {                                           
             if (q_class[i]->GetPackets() != 0)
             {

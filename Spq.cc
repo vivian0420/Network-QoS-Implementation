@@ -149,34 +149,6 @@ template <typename Packet>
 SPQ<Packet>::SPQ()
 {
     NS_LOG_FUNCTION (this);
-    TrafficClass* tc_high = new TrafficClass(100000,
-                                         2,
-                                         false,
-                                         "10.1.2.2",
-                                         "255.255.255.0",
-                                         9,
-                                         17,
-                                         "10.1.1.1",
-                                         "255.255.255.0",
-                                         9999,
-                                         "10.1.1.0",
-                                         "10.1.2.0");
-    q_class.push_back(tc_high);
-
-    TrafficClass* tc_low = new TrafficClass(100000,
-                                         1,
-                                         true,
-                                         "10.1.2.2",
-                                         "255.255.255.0",
-                                         9,
-                                         17,
-                                         "10.1.1.1",
-                                         "255.255.255.0",
-                                         8888,
-                                         "10.1.1.0",
-                                         "10.1.2.0");
-    q_class.push_back(tc_low);
-    q_num = 2;
 }
 
 template <typename Packet>
