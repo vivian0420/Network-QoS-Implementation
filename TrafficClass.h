@@ -35,7 +35,9 @@ class TrafficClass
                  uint32_t protNum,
                  Ipv4Address sourIpAddr,
                  Ipv4Mask sourMask,
-                 uint32_t sourPortNum);
+                 uint32_t sourPortNum,
+                 Ipv4Address sourIp,
+                 Ipv4Address destIp);
     TrafficClass(uint32_t maxPackets,
                  uint32_t quantum_size,
                  uint32_t deficit_counter,
@@ -46,7 +48,9 @@ class TrafficClass
                  uint32_t protNum,
                  Ipv4Address sourIpAddr,
                  Ipv4Mask sourMask,
-                 uint32_t sourPortNum);
+                 uint32_t sourPortNum,
+                 Ipv4Address sourIp,
+                 Ipv4Address destIp);
     ~TrafficClass();
 
     void SetPackets(uint32_t p);

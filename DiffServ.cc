@@ -37,7 +37,9 @@ DiffServ<Packet>::DiffServ(uint32_t maxPackets,
                            uint32_t protNum,
                            Ipv4Address sourIpAddr,
                            Ipv4Mask sourMask,
-                           uint32_t sourPortNum)
+                           uint32_t sourPortNum,
+                           Ipv4Address sourIp,
+                           Ipv4Address destIp)
     : Queue<Packet>()
 {
     NS_LOG_FUNCTION(this);
@@ -51,7 +53,9 @@ DiffServ<Packet>::DiffServ(uint32_t maxPackets,
                                         protNum,
                                         sourIpAddr,
                                         sourMask,
-                                        sourPortNum);
+                                        sourPortNum,
+                                        sourIp,
+                                        destIp);
     q_class.push_back(tc);
     in = 0;
     out = 0;

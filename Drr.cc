@@ -47,7 +47,9 @@ DiffServ<Packet>::DiffServ(uint32_t maxPackets,
                            uint32_t protNum,
                            Ipv4Address sourIpAddr,
                            Ipv4Mask sourMask,
-                           uint32_t sourPortNum)
+                           uint32_t sourPortNum,
+                           Ipv4Address sourIp,
+                           Ipv4Address destIp)
     // : Queue<Packet>()
 {
     NS_LOG_FUNCTION(this);
@@ -61,7 +63,9 @@ DiffServ<Packet>::DiffServ(uint32_t maxPackets,
                                         protNum,
                                         sourIpAddr,
                                         sourMask,
-                                        sourPortNum);
+                                        sourPortNum,
+                                        sourIp,
+                                        destIp);
     q_class.push_back(tc);
     in = 0;
     out = 0;
@@ -143,12 +147,14 @@ DRR<Packet>::DRR()
                                          0,
                                          false,
                                          "10.1.2.2",
-                                         "255.255.255.3",
+                                         "255.255.255.0",
                                          9,
                                          17,
                                          "10.1.1.1",
-                                         "255.255.255.3",
-                                         6666);
+                                         "255.255.255.0",
+                                         6666,
+                                         "10.1.1.0",
+                                         "10.1.2.0");
     q_class.push_back(tc1);
 
     TrafficClass* tc2 = new TrafficClass(100000,
@@ -156,12 +162,14 @@ DRR<Packet>::DRR()
                                          0,
                                          false,
                                          "10.1.2.2",
-                                         "255.255.255.3",
+                                         "255.255.255.0",
                                          9,
                                          17,
                                          "10.1.1.1",
-                                         "255.255.255.3",
-                                         8888);
+                                         "255.255.255.0",
+                                         8888,
+                                         "10.1.1.0",
+                                         "10.1.2.0");
     q_class.push_back(tc2);
 
     TrafficClass* tc3 = new TrafficClass(100000,
@@ -169,12 +177,14 @@ DRR<Packet>::DRR()
                                          0,
                                          true,
                                          "10.1.2.2",
-                                         "255.255.255.3",
+                                         "255.255.255.0",
                                          9,
                                          17,
                                          "10.1.1.1",
-                                         "255.255.255.3",
-                                         9999);
+                                         "255.255.255.0",
+                                         9999,
+                                         "10.1.1.0",
+                                         "10.1.2.0");
     q_class.push_back(tc3);
     q_num = 3;
 }
@@ -197,7 +207,9 @@ DRR<Packet>::DRR(std::vector<MyConfig> configs)
                                          config.protNum,
                                          config.sourIpAddr,
                                          config.sourMask,
-                                         config.sourPortNum);
+                                         config.sourPortNum,
+                                         config.sourceIp,
+                                         config.destIp);
         q_class.push_back(tc);
         q_num++;
     }

@@ -29,17 +29,19 @@ TrafficClass::TrafficClass(uint32_t maxPackets,
                            uint32_t protNum,
                            Ipv4Address sourIpAddr,
                            Ipv4Mask sourMask,
-                           uint32_t sourPortNum)
+                           uint32_t sourPortNum,
+                           Ipv4Address sourIp,
+                           Ipv4Address destIp)
 {
     this->maxPackets = maxPackets;
     this->priority_level = priority_level;
     this->isDefault = isDefault;
     DestinationIpAddress* dest_ip_addr = new DestinationIpAddress(destIpAddr);
-    DestinationMask* dest_mask = new DestinationMask(destMask);
+    DestinationMask* dest_mask = new DestinationMask(destMask, destIp);
     DestinationPortNumber* dest_port_number = new DestinationPortNumber(destPortNum);
     ProtocolNumber* porto_number = new ProtocolNumber(protNum);
     SourceIpAddress* sour_ip_addr = new SourceIpAddress(sourIpAddr);
-    SourceMask* sour_mask = new SourceMask(sourMask);
+    SourceMask* sour_mask = new SourceMask(sourMask, sourIp);
     SourcePortNumber* sour_port_number = new SourcePortNumber(sourPortNum);
     Filter* filter = new Filter(dest_ip_addr,
                                 dest_mask,
@@ -65,7 +67,9 @@ TrafficClass::TrafficClass(uint32_t maxPackets,
              uint32_t protNum,
              Ipv4Address sourIpAddr,
              Ipv4Mask sourMask,
-             uint32_t sourPortNum)
+             uint32_t sourPortNum,
+             Ipv4Address sourIp,
+             Ipv4Address destIp)
 {
     this->maxPackets = maxPackets;
     this->quantum_size = quantum_size;
@@ -74,11 +78,11 @@ TrafficClass::TrafficClass(uint32_t maxPackets,
     this->isDefault = isDefault;
 
     DestinationIpAddress* dest_ip_addr = new DestinationIpAddress(destIpAddr);
-    DestinationMask* dest_mask = new DestinationMask(destMask);
+    DestinationMask* dest_mask = new DestinationMask(destMask, destIp);
     DestinationPortNumber* dest_port_number = new DestinationPortNumber(destPortNum);
     ProtocolNumber* porto_number = new ProtocolNumber(protNum);
     SourceIpAddress* sour_ip_addr = new SourceIpAddress(sourIpAddr);
-    SourceMask* sour_mask = new SourceMask(sourMask);
+    SourceMask* sour_mask = new SourceMask(sourMask, sourIp);
     SourcePortNumber* sour_port_number = new SourcePortNumber(sourPortNum);
     Filter* filter = new Filter(dest_ip_addr,
                                 dest_mask,

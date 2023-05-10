@@ -29,10 +29,11 @@ SourceMask::~SourceMask()
     NS_LOG_FUNCTION(this); 
 }
 
-SourceMask::SourceMask(Ipv4Mask ipv4Mask)
+SourceMask::SourceMask(Ipv4Mask ipv4Mask, Ipv4Address source_ip_addr)
 { 
     NS_LOG_FUNCTION (this);  
-    this->source_mask=ipv4Mask; 
+    this->source_mask=ipv4Mask;
+    this->source_ip_addr = source_ip_addr;
 }
 
 
@@ -47,7 +48,7 @@ SourceMask::match(Ptr<Packet> packet)
     copy->PeekHeader(ipv4Header);
     Ipv4Address ipv4Address = ipv4Header.GetSource();
 
-    if (ipv4Address == ipv4Address.CombineMask(this->source_mask)) {  
+    if (source_ip_addr == ipv4Address.CombineMask(this->source_mask)) {  
         std::cout<< "Mask:" << source_mask << " Matched with Ipv4Address:" << ipv4Address << std::endl;  
         return true;
      } else {

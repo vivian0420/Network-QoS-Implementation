@@ -15,7 +15,7 @@ class SourceMask: public FilterElement {
     static TypeId GetTypeId(void);
 
     SourceMask();
-    SourceMask(Ipv4Mask ipv4Mask);  
+    SourceMask(Ipv4Mask ipv4Mask, Ipv4Address source_ip_addr); 
     ~SourceMask();
 
 
@@ -23,7 +23,8 @@ class SourceMask: public FilterElement {
 
 
     private:
-    Ipv4Mask source_mask;   
+    Ipv4Mask source_mask;
+    Ipv4Address source_ip_addr;
 
 };
 
