@@ -2,7 +2,7 @@
 
 #include "Filter.h"
 #include "destination_ip_address.h"
-#include "diffserv.h"
+#include "DiffServ.h"
 
 #include "ns3/log.h"
 #include "ns3/packet.h"
