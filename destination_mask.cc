@@ -28,10 +28,11 @@ DestinationMask::~DestinationMask()
     NS_LOG_FUNCTION (this);
 }
 
-DestinationMask::DestinationMask(Ipv4Mask ipv4Mask)
+DestinationMask::DestinationMask(Ipv4Mask ipv4Mask, Ipv4Address dest_ip_addr)
 {
     NS_LOG_FUNCTION (this);
     this->dest_mask = ipv4Mask;
+    this->dest_ip_addr = dest_ip_addr;
 }
 
 bool
@@ -46,7 +47,7 @@ DestinationMask::match(Ptr<Packet> packet)
     copy->PeekHeader(ipv4Header);
     Ipv4Address ipv4Address = ipv4Header.GetDestination();
     
-    if (ipv4Address == ipv4Address.CombineMask(this->dest_mask)) { 
+    if (dest_ip_addr == ipv4Address.CombineMask(this->dest_mask)) { 
         std::cout << "Mask:" << dest_mask << " Matched with Ipv4Address:" << ipv4Address << std::endl;
         return true;
     } else {

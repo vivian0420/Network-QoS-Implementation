@@ -31,7 +31,9 @@ class DiffServ : public Queue<Packet>
              uint32_t protNum,
              Ipv4Address sourIpAddr,
              Ipv4Mask sourMask,
-             uint32_t sourPortNum);
+             uint32_t sourPortNum,
+             Ipv4Address sourIp,
+             Ipv4Address destIp);
     ~DiffServ();
     static TypeId GetTypeId(void);
     Ptr<Packet> Schedule();

@@ -14,7 +14,7 @@ class DestinationMask: public FilterElement {
     static TypeId GetTypeId(void);
 
     DestinationMask();
-    DestinationMask(Ipv4Mask ipv4Mask);  
+    DestinationMask(Ipv4Mask ipv4Mask, Ipv4Address dest_ip_addr);  
     ~DestinationMask();
 
 
@@ -22,7 +22,8 @@ class DestinationMask: public FilterElement {
 
 
     private:
-    Ipv4Mask dest_mask;   
+    Ipv4Mask dest_mask;
+    Ipv4Address dest_ip_addr;  
 
 };
 
