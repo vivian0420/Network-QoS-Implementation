@@ -47,19 +47,11 @@ ProtocolNumber::match(Ptr<Packet> packet)
     copy->RemoveHeader(pppHeader);
     copy->PeekHeader(ipv4Header);
 
-    uint8_t protocolNumber = ipv4Header.GetProtocol();
+    uint16_t protocolNumber = ipv4Header.GetProtocol();
 
     std::cout << " ProtocolNumber.protocolNumber:" << protocolNumber << std::endl;
-    std::cout << " ProtocolNumber.value:" << protocolNumber << std::endl;
+    std::cout << " ProtocolNumber.protocol:" << protocol << std::endl;
 
     return protocolNumber == protocol;
-
-    // if (protocolNumber == protocol){
-    //     std::cout << " Matched protocolNumber:" << protocolNumber << std::endl;
-    //     return true;
-    // } else {
-    //     std::cout << " Not Matched protocolNumber:" << protocolNumber << std::endl;
-    //     return false;
-    // }
 
 }
