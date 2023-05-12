@@ -301,7 +301,7 @@ DRR<Packet>::DoPeek() const
 {
     if (getTempqueue()->empty())
     {
-        for (int i = 0; i < q_num; i++)
+        for (uint32_t i = 0; i < q_num; i++)
         {                                           
             if (q_class[i]->getPackets() != 0)
             {
@@ -325,7 +325,7 @@ template <typename Packet>
 uint32_t
 DRR<Packet>::Classify(Ptr<Packet> p)
 {
-    for (int i = 0; i < q_num; i++)
+    for (uint32_t i = 0; i < q_num; i++)
     {
         if (q_class[i]->match(p))
         {
@@ -341,7 +341,7 @@ DRR<Packet>::Schedule()
 {
     if (getTempqueue()->empty())
     {
-        for (int i = 0; i < q_num; i++)
+        for (uint32_t i = 0; i < q_num; i++)
         {                                           
             if (q_class[i]->GetPackets() != 0)
             {
@@ -438,14 +438,14 @@ main(int argc, char* argv[])
 
     NetDeviceContainer d0r;
     Ptr<PointToPointNetDevice> devA = CreateObject<PointToPointNetDevice>();
-    devA->SetAttribute("DataRate", StringValue("10Mbps"));
+    devA->SetAttribute("DataRate", StringValue("4Mbps"));
     devA->SetAddress(Mac48Address::Allocate());
     n0r.Get(0)->AddDevice(devA);
     Ptr<DRR<Packet>> queueA = CreateObject<DRR<Packet>>(myConfigs);
     devA->SetQueue(queueA);
 
     Ptr<PointToPointNetDevice> devB = CreateObject<PointToPointNetDevice>();
-    devB->SetAttribute("DataRate", StringValue("10Mbps"));
+    devB->SetAttribute("DataRate", StringValue("4Mbps"));
     devB->SetAddress(Mac48Address::Allocate());
     n0r.Get(1)->AddDevice(devB);
     Ptr<DRR<Packet>> queueB = CreateObject<DRR<Packet>>(myConfigs);
@@ -459,14 +459,14 @@ main(int argc, char* argv[])
 
     NetDeviceContainer d1r;
     Ptr<PointToPointNetDevice> devC = CreateObject<PointToPointNetDevice>();
-    devC->SetAttribute("DataRate", StringValue("10Mbps"));
+    devC->SetAttribute("DataRate", StringValue("1Mbps"));
     devC->SetAddress(Mac48Address::Allocate());
     n1r.Get(0)->AddDevice(devC);
     Ptr<DRR<Packet>> queueC = CreateObject<DRR<Packet>>(myConfigs);
     devC->SetQueue(queueC);
 
     Ptr<PointToPointNetDevice> devD = CreateObject<PointToPointNetDevice>();
-    devD->SetAttribute("DataRate", StringValue("10Mbps"));
+    devD->SetAttribute("DataRate", StringValue("1Mbps"));
     devD->SetAddress(Mac48Address::Allocate());
     n1r.Get(1)->AddDevice(devD);
     Ptr<DRR<Packet>> queueD = CreateObject<DRR<Packet>>(myConfigs);
@@ -506,21 +506,21 @@ main(int argc, char* argv[])
     Address address3(InetSocketAddress(i1r.GetAddress(1), 9));
 
     Ptr<UdpApplication> clientApps1 = CreateObject<UdpApplication>();
-    clientApps1->Setup(socket1, address1, 1162, 6000, DataRate("10Mbps"), 6666);
+    clientApps1->Setup(socket1, address1, 1162, 6000, DataRate("4Mbps"), 6666);
     nodes.Get(0)->AddApplication(clientApps1);
     clientApps1->SetStartTime(Seconds(2.));
     clientApps1->SetStopTime(Seconds(10.));
     
 
     Ptr<UdpApplication> clientApps2 = CreateObject<UdpApplication>();
-    clientApps2->Setup(socket2, address2, 1162, 6000, DataRate("10Mbps"), 8888);
+    clientApps2->Setup(socket2, address2, 1162, 6000, DataRate("4Mbps"), 8888);
     nodes.Get(0)->AddApplication(clientApps2);
     clientApps2->SetStartTime(Seconds(2.));
     clientApps2->SetStopTime(Seconds(10.));
     
 
     Ptr<UdpApplication> clientApps3 = CreateObject<UdpApplication>();
-    clientApps3->Setup(socket3, address3, 1162, 6000, DataRate("10Mbps"), 9999);
+    clientApps3->Setup(socket3, address3, 1162, 6000, DataRate("4Mbps"), 9999);
     nodes.Get(0)->AddApplication(clientApps3);
     clientApps3->SetStartTime(Seconds(2.));
     clientApps3->SetStopTime(Seconds(10.));
