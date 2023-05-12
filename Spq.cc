@@ -406,14 +406,14 @@ main(int argc, char* argv[])
 
     NetDeviceContainer d0r;
     Ptr<PointToPointNetDevice> devA = CreateObject<PointToPointNetDevice>();
-    devA->SetAttribute("DataRate", StringValue("10Mbps"));
+    devA->SetAttribute("DataRate", StringValue("4Mbps"));
     devA->SetAddress(Mac48Address::Allocate());
     n0r.Get(0)->AddDevice(devA);
     Ptr<SPQ<Packet>> queueA = CreateObject<SPQ<Packet>>(myConfigs);
     devA->SetQueue(queueA);
 
     Ptr<PointToPointNetDevice> devB = CreateObject<PointToPointNetDevice>();
-    devB->SetAttribute("DataRate", StringValue("10Mbps"));
+    devB->SetAttribute("DataRate", StringValue("4Mbps"));
     devB->SetAddress(Mac48Address::Allocate());
     n0r.Get(1)->AddDevice(devB);
     Ptr<SPQ<Packet>> queueB = CreateObject<SPQ<Packet>>(myConfigs);
@@ -427,14 +427,14 @@ main(int argc, char* argv[])
 
     NetDeviceContainer d1r;
     Ptr<PointToPointNetDevice> devC = CreateObject<PointToPointNetDevice>();
-    devC->SetAttribute("DataRate", StringValue("10Mbps"));
+    devC->SetAttribute("DataRate", StringValue("1Mbps"));
     devC->SetAddress(Mac48Address::Allocate());
     n1r.Get(0)->AddDevice(devC);
     Ptr<SPQ<Packet>> queueC = CreateObject<SPQ<Packet>>(myConfigs);
     devC->SetQueue(queueC);
 
     Ptr<PointToPointNetDevice> devD = CreateObject<PointToPointNetDevice>();
-    devD->SetAttribute("DataRate", StringValue("10Mbps"));
+    devD->SetAttribute("DataRate", StringValue("1Mbps"));
     devD->SetAddress(Mac48Address::Allocate());
     n1r.Get(1)->AddDevice(devD);
     Ptr<SPQ<Packet>> queueD = CreateObject<SPQ<Packet>>(myConfigs);
@@ -473,13 +473,13 @@ main(int argc, char* argv[])
     nodes.Get(0)->AddApplication(clientApps1);
     clientApps1->SetStartTime(Seconds(1.0));
     clientApps1->SetStopTime(Seconds(20.0));
-    clientApps1->Setup(socket1, address1, 1000, 1000000, DataRate("10Mbps"), 8888);
+    clientApps1->Setup(socket1, address1, 1000, 1000000, DataRate("4Mbps"), 8888);
 
     Ptr<UdpApplication> clientApps2 = CreateObject<UdpApplication>();
     nodes.Get(0)->AddApplication(clientApps2);
     clientApps2->SetStartTime(Seconds(10.0));
     clientApps2->SetStopTime(Seconds(20.0));
-    clientApps2->Setup(socket2, address2, 1000, 1500000, DataRate("10Mbps"), 9999);
+    clientApps2->Setup(socket2, address2, 1000, 1500000, DataRate("4Mbps"), 9999);
 
     PointToPointHelper pointToPoint0;
     pointToPoint0.EnablePcapAll("udp");
