@@ -14,7 +14,7 @@ class DiffServ : public Queue<Packet>
   protected:
     int in;
     int out;
-    std::vector<TrafficClass> q_class;
+    std::vector<TrafficClass*> q_class;
     bool DoEnqueue(Ptr<Packet> p);
     Ptr<Packet> DoDequeue();
     Ptr<Packet> DoRemove();
