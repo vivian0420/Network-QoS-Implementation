@@ -13,7 +13,7 @@ DiffServ<Packet>::GetTypeId(void)
 {
     static TypeId tid = TypeId("DiffServ<Packet>")
                             .SetParent<Queue<Packet>>()
-                            .SetGroupName("Network QoS")
+                            .SetGroupName("DiffServ")
                             .template AddConstructor<DiffServ<Packet>>();
     return tid;
 }
@@ -110,19 +110,19 @@ Ptr<const Packet>
 DiffServ<Packet>::DoPeek()
 {
     NS_LOG_FUNCTION(this);
-    return q_class[out % q_class.size()].Peek();
+    return q_class[out % q_class.size()]->Peek();
 }
 
 template <typename Packet>
 Ptr<Packet>
 DiffServ<Packet>::Schedule()
 {
-    return q_class[out % q_class.size()].Dequeue();
+    return q_class[out % q_class.size()]->Dequeue();
 }
 
 template <typename Packet>
 uint32_t
 DiffServ<Packet>::Classify(Ptr<Packet> p)
 {
-   return q_class[in % q_class.size()].Enqueue(p);
+   return q_class[in % q_class.size()]->Enqueue(p);
 }

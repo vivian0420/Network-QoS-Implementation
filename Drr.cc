@@ -120,21 +120,21 @@ Ptr<const Packet>
 DiffServ<Packet>::DoPeek()
 {
     NS_LOG_FUNCTION(this);
-    return q_class[out % q_class.size()].Peek();
+    return q_class[out % q_class.size()]->Peek();
 }
 
 template <typename Packet>
 Ptr<Packet>
 DiffServ<Packet>::Schedule()
 {
-    return q_class[out % q_class.size()].Dequeue();
+    return q_class[out % q_class.size()]->Dequeue();
 }
 
 template <typename Packet>
 uint32_t
 DiffServ<Packet>::Classify(Ptr<Packet> p)
 {
-   return q_class[in % q_class.size()].Enqueue(p);
+   return q_class[in % q_class.size()]->Enqueue(p);
 }
 
 template <typename Packet>
@@ -147,6 +147,7 @@ template <typename Packet>
 DRR<Packet>::DRR(std::vector<MyConfig> configs)
 {
     NS_LOG_FUNCTION (this);
+    q_num = 0;
     for (uint32_t i = 0; i < configs.size(); i++)
     {
         MyConfig config = configs[i];
@@ -303,7 +304,7 @@ DRR<Packet>::DoPeek() const
     {
         for (uint32_t i = 0; i < q_num; i++)
         {                                           
-            if (q_class[i]->getPackets() != 0)
+            if (q_class[i]->GetPackets() != 0)
             {
                 q_class[i]->setDeficitCounter(q_class[i]->getDeficitCounter() +
                                               q_class[i]->getQuantumSize());
