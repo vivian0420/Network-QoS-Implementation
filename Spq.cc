@@ -296,7 +296,7 @@ template <typename Packet>
 Ptr<const Packet>
 SPQ<Packet>::DoPeek() const
 {
-    for(int i = 0; i < q_num; i++) {
+    for(uint32_t i = 0; i < q_num; i++) {
         if(!q_class[i]->IsEmpty()) {
             return q_class[i]->getMqueue()->front();
         }
@@ -308,7 +308,7 @@ template <typename Packet>
 uint32_t
 SPQ<Packet>::Classify(Ptr<Packet> p)
 {
-    for (int i = 0; i < q_num; i++)
+    for (uint32_t i = 0; i < q_num; i++)
     {
         if (q_class[i]->match(p))
         {
@@ -322,7 +322,7 @@ template <typename Packet>
 std::queue<Ptr<Packet>>*
 SPQ<Packet>::Schedule()
 {
-    for(int i = 0; i < q_num; i++) {
+    for(uint32_t i = 0; i < q_num; i++) {
         if(!q_class[i]->IsEmpty()) {
             return q_class[i]->getMqueue();
         }

@@ -301,7 +301,7 @@ DRR<Packet>::DoPeek() const
 {
     if (getTempqueue()->empty())
     {
-        for (int i = 0; i < q_num; i++)
+        for (uint32_t i = 0; i < q_num; i++)
         {                                           
             if (q_class[i]->getPackets() != 0)
             {
@@ -325,7 +325,7 @@ template <typename Packet>
 uint32_t
 DRR<Packet>::Classify(Ptr<Packet> p)
 {
-    for (int i = 0; i < q_num; i++)
+    for (uint32_t i = 0; i < q_num; i++)
     {
         if (q_class[i]->match(p))
         {
@@ -341,7 +341,7 @@ DRR<Packet>::Schedule()
 {
     if (getTempqueue()->empty())
     {
-        for (int i = 0; i < q_num; i++)
+        for (uint32_t i = 0; i < q_num; i++)
         {                                           
             if (q_class[i]->GetPackets() != 0)
             {
